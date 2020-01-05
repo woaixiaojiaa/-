@@ -1,0 +1,39 @@
+C++11中提供了std::bind，可以说是一种飞跃的提升，bind本身是一种延迟计算的思想，它本身可以绑定普通函数、全局函数、静态函数、类静态函数甚至是类成员函数。
+
+#include <iostream>
+#include <functional>
+using namespace std;
+ 
+int TestFunc(int a, char c, float f)
+{
+    cout << a << endl;
+    cout << c << endl;
+    cout << f << endl;
+ 
+    return a;
+}
+ 
+int main()
+{
+    auto bindFunc1 = bind(TestFunc, std::placeholders::_1, 'A', 100.1);
+    bindFunc1(10);
+ 
+    cout << "=================================\n";
+ 
+    auto bindFunc2 = bind(TestFunc, std::placeholders::_2, std::placeholders::_1, 100.1);
+    bindFunc2('B', 10);
+ 
+    cout << "=================================\n";
+ 
+    auto bindFunc3 = bind(TestFunc, std::placeholders::_2, std::placeholders::_3, std::placeholders::_1);
+    bindFunc3(100.1, 30, 'C');
+ 
+    return 0;
+}
+从上面的代码可以看到，bind能够在绑定时候就同时绑定一部分参数，未提供的参数则使用占位符表示，然后在运行时传入实际的参数值。
+
+PS：绑定的参数将会以值传递的方式传递给具体函数，占位符将会以引用传递。
+
+众所周知，静态成员函数其实可以看做是全局函数，而非静态成员函数则需要传递this指针作为第一个参数，所以std::bind能很容易地绑定成员函数。
+
+bind最终将会生成一个可调用对象，这个对象可以直接赋值给std::function对象，而std::bind绑定的可调用对象可以是Lambda表达式或者类成员函数等可调用对象，它能随意绑定任何函数，将所有的函数都能统一到std::function
